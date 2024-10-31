@@ -1,13 +1,11 @@
-from typing import List, Dict, Set, Tuple, Any, Union
+from typing import List, Dict, Tuple, Any, Union
 
 import socketio
 from eventlet import wsgi
 
-import vulcan.search
 from vulcan.file_loader import create_layout_from_filepath
 from vulcan.search.search import SearchFilter, perform_search_on_layout, create_list_of_possible_search_filters
 from vulcan.data_handling.data_corpus import CorpusSlice
-from vulcan.data_handling.linguistic_objects.graphs.penman_converter import from_penman_graph
 from vulcan.data_handling.linguistic_objects.table import cell_coordinates_to_cell_name
 import eventlet
 

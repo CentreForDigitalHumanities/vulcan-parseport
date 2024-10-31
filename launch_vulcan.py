@@ -1,14 +1,5 @@
-import pickle
-import json
-import sys
 from argparse import ArgumentParser
 
-from vulcan.data_handling.linguistic_objects.trees.am_tree_as_dict import generate_random_label_alternatives, \
-    alignments_from_amtree
-from vulcan.server.basic_layout import BasicLayout
-from vulcan.server.server import Server
-from vulcan.data_handling.data_corpus import from_dict_list
-from amconll import parse_amconll
 
 from vulcan.server_launcher import launch_server_from_file
 

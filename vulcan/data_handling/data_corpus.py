@@ -81,7 +81,7 @@ def load_linker_entry(data_corpus, entry):
                 data_corpus.size = len(entry['scores'])
     else:
         data_corpus.size = len(entry['scores'])
-        print(f"Retreived DataCorpus size from 'data' entry \"{entry['name1']}\"--\"{entry['name2']}\":"
+        print(f"Retrieved DataCorpus size from 'data' entry \"{entry['name1']}\"--\"{entry['name2']}\":"
               f" {data_corpus.size} instances")
 
 
@@ -126,7 +126,7 @@ def process_instances(data_corpus, entry, name):
                 data_corpus.size = len(entry['instances'])
     else:
         data_corpus.size = len(entry['instances'])
-        print(f"Retreived DataCorpus size from 'data' entry {name}: {data_corpus.size} instances")
+        print(f"Retrieved DataCorpus size from 'data' entry {name}: {data_corpus.size} instances")
     input_format = entry.get('format', 'string')
     instance_reader = get_instance_reader_by_name(input_format)
     instances = instance_reader.convert_instances(instances)

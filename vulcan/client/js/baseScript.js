@@ -146,9 +146,6 @@ d3.select("#nextButton")
     .on("click", function() {
         if (set_corpus_position(current_corpus_position + 1)) {
             sio.emit("instance_requested", current_corpus_position);
-        } else {
-            // console.log("no more instances");
-            // console.log(corpus_length)
         }
     });
 
