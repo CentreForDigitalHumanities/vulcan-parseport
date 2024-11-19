@@ -1,9 +1,9 @@
 import json
-from flask import Flask, Response, render_template, request, session
+from flask import Flask, Response, render_template, request, session, g
 from flask_socketio import SocketIO, emit
 from logger import log
 from vulcan.file_loader import create_layout_from_filepath
-
+from server_methods import instance_requested
 
 SECRET_KEY = "My secret key"
 
@@ -14,15 +14,21 @@ def create_app() -> Flask:
 
     log.info("Creating standard layout...")
     standard_layout = create_layout_from_filepath(
+        # Petit Prince
         # input_path="./little_prince_simple.pickle",
-        input_path="./all.pickle",
+
+        # Test pickle from Meaghan, should be used if no input is provided.
+        # input_path="./all.pickle",
+
+        # Test data from parser.
+        input_path="./output.pickle",
+
         is_json_file=False,
         propbank_path=None,
     )
     log.info("Standard layout created.")
-
     
-    app = Flask(__name__, template_folder='vulcan/client', static_folder='vulcan/client/js')
+    app = Flask(__name__, template_folder='vulcan/client', static_folder='vulcan/client/static')
     app.config['SECRET_KEY'] = SECRET_KEY
 
     @app.route('/')
@@ -39,32 +45,26 @@ def create_app() -> Flask:
                 response=json.dumps(dict(ok=False))
             )
 
-        print('Input is None', data['input'] is None)
-
-        if data['input'] is None:
-            print('Data input is None, so we use the standard corpus.')
-            layout = standard_layout
-        else:
-            print('Input provided! Now create a layout from it!')
-            # layout = create_layout_from_input(...)
-            layout = None
-
+        # Store request input in session.
+        sid = request.sid
+        session[sid] = data['input']
 
         # Process the data as needed
-        socketio.emit('start', data)
-        return 'SocketIO instance started with data', 200
+        return {'status': 'SocketIO instance started with data'}, 200
     
     @socketio.on('connect')
     def handle_connect():
         from vulcan.server.server import make_layout_sendable, create_list_of_possible_search_filters
 
-
         print('Connected!')
         sid = request.sid
-        # This doesn't work yet, because the layout is not serializable.
-        # layout = session.get('layout')
 
-        layout = standard_layout
+        # TODO: investigate if we can serialize the layout instead.
+
+        if sid in session:
+            layout = session[sid]
+        else:
+            layout = standard_layout
         
         show_node_names = session.get('show_node_names')
         print('Layout for session:', layout)
@@ -76,7 +76,7 @@ def create_app() -> Flask:
             emit('set_corpus_length', layout.corpus_size, to=sid)
             emit('set_show_node_names', {"show_node_names": show_node_names}, to=sid)
             emit('set_search_filters', create_list_of_possible_search_filters(layout), to=sid)
-            # instance_requested(sid, 0)
+            instance_requested(sid, layout, 0)
         except Exception as e:
             log.exception(e)
             emit("server_error", to=sid)
@@ -85,6 +85,9 @@ def create_app() -> Flask:
     def handle_disconnect():
         print('Client disconnected')
 
+    @socketio.on('instance_requested')
+    def handle_instance_requested(index):
+        instance_requested(request.sid, standard_layout, index)
     
     socketio.init_app(app)
     return app
