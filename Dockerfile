@@ -26,5 +26,12 @@ RUN mkdir -p /logs
 # Expose port
 EXPOSE 5050
 
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=1
+
+# Expose the port
+EXPOSE 32771
+
 # Run server
-CMD ["python", "launch_vulcan.py", "little_prince_simple.pickle", "--address=0.0.0.0", "--port=5050"]
+CMD ["python", "start_server.py"]
+# CMD ["python", "launch_vulcan.py", "little_prince_simple.pickle", "--address=0.0.0.0", "--port=5050"]
