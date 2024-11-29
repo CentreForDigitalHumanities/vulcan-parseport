@@ -3,7 +3,8 @@ from flask_socketio import SocketIO, emit
 from logger import log
 from vulcan.file_loader import create_layout_from_filepath
 from server_methods import instance_requested
-from process_parse_data import process_parse_data
+
+# from process_parse_data import process_parse_data
 
 # TODO: Add to env/secrets
 SECRET_KEY = "My secret key"
