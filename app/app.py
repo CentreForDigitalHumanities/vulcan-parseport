@@ -4,6 +4,7 @@ from logger import log
 from vulcan.file_loader import create_layout_from_filepath
 from server_methods import instance_requested
 from process_parse_data import process_parse_data
+from db.models import db, ParseResult
 
 # TODO: Add to env/secrets
 SECRET_KEY = "My secret key"
@@ -46,11 +47,11 @@ def create_app() -> Flask:
         After validating the input, the input is stored in a SQLite database
         along with the UUID and a timestamp.
         """
-        # try:
-        #     # process_parse_data(request, db)
-        # except Exception as e:
-        #     log.exception(f"An exception occurred while parsing the data: {e}")
-        #     return {"ok": False}, 500
+        try:
+            process_parse_data(request, db)
+        except Exception as e:
+            log.exception(f"An exception occurred while parsing the data: {e}")
+            return {"ok": False}, 500
         return {"ok": True}, 200
 
     @socketio.on("connect")
@@ -96,6 +97,12 @@ def create_app() -> Flask:
     @socketio.on("instance_requested")
     def handle_instance_requested(index):
         instance_requested(request.sid, standard_layout, index)
+
+    socketio.init_app(app)
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
 
     return app
 

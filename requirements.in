@@ -5,3 +5,4 @@ wikipedia
 nltk
 conllu
 flask-socketio
+flask-sqlalchemy
