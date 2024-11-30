@@ -60,7 +60,7 @@ To run the server locally, you need to have Python 3.12 or higher installed (low
     pip install -r requirements.txt
     ```
 
-3. Start the development server by running the following command:
+3. Start the development server by running the following command in the `/app` folder:
 
     ```bash
     flask run --host 0.0.0.0
@@ -71,14 +71,14 @@ To run the server locally, you need to have Python 3.12 or higher installed (low
 
 ### Running the server in a Docker container
 
-Running the server in a stand-alone container is much easier. Simply run the following commands in the root directory of the project:
+To run the server in a stand-alone container, run the following commands in the root directory of the project:
 
 ```bash
 docker build -t vulcan-parseport .
 docker run -d -p 5000:5000 --name vulcan-parseport vulcan-parseport
 ```
 
-This will build the Docker image and run a container with the image. The server will be available at `http://localhost:5000`. You can add `-v ./app:/app:rw` to the `docker run` command to mount the `app` directory to the container, allowing you to make changes to the code and reload the server on changes.
+This will build the Docker image and run a container with the image. The server will be available at `http://localhost:5000`. You can add `-v ./app:/app:rw` to the `docker run` command to mount the `app` directory to the container, which enables auto-reload whenever the code in `app` is changed.
 
 ### Running the server as part of the ParsePort container network
 

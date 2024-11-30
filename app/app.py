@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, session
 from flask_socketio import SocketIO, emit
 from logger import log
@@ -5,9 +6,6 @@ from vulcan.file_loader import create_layout_from_filepath
 from server_methods import instance_requested
 
 # from process_parse_data import process_parse_data
-
-# TODO: Add to env/secrets
-SECRET_KEY = "My secret key"
 
 socketio = SocketIO()
 
@@ -29,7 +27,7 @@ def create_app() -> Flask:
     app = Flask(
         __name__, template_folder="vulcan/client", static_folder="vulcan/client/static"
     )
-    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["SECRET_KEY"] = os.environ.get("VULCAN_SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
     @app.route("/status/", methods=["GET"])
