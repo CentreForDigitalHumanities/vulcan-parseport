@@ -15,23 +15,15 @@ COPY requirements.txt /
 RUN pip install --no-cache-dir -r /requirements.txt
 
 # Set working directory
-WORKDIR /src
-
-# Copy project
-COPY . /src/
-
-# Create a directory for server logs (production).
-RUN mkdir -p /logs
-
-# Expose port
-EXPOSE 5050
+COPY app /app
+WORKDIR /app
 
 ENV FLASK_APP=app.py
-ENV FLASK_ENV=1
+ENV FLASK_DEBUG=$VULCAN_DEBUG
+ENV FLASK_RUN_PORT=$VULCAN_PORT
 
 # Expose the port
-EXPOSE 32771
+EXPOSE $VULCAN_PORT
 
 # Run server
-CMD ["python", "start_server.py"]
-# CMD ["python", "launch_vulcan.py", "little_prince_simple.pickle", "--address=0.0.0.0", "--port=5050"]
+CMD ["flask", "run", "--host=0.0.0.0"]

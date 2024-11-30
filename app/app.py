@@ -52,6 +52,9 @@ def create_app() -> Flask:
         # except Exception as e:
         #     log.exception(f"An exception occurred while parsing the data: {e}")
         #     return {"ok": False}, 500
+
+        # TODO: see if we can convert the input to a layout and store that in the database instead (somehow).
+
         return {"ok": True}, 200
 
     @socketio.on("connect")
