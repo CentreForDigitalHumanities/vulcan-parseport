@@ -1,16 +1,15 @@
+import os
 from flask import Flask, request, session
 from flask_socketio import SocketIO, emit
 from logger import log
 from vulcan.file_loader import create_layout_from_filepath
 from server_methods import instance_requested
 from process_parse_data import process_parse_data
-from db.models import db, ParseResult
+from db.models import db
 
-# TODO: Add to env/secrets
-SECRET_KEY = "My secret key"
 
-socketio = SocketIO()
-
+# TODO: Handle CORS properly.
+socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app() -> Flask:
     log.info("Creating app...")
@@ -29,7 +28,7 @@ def create_app() -> Flask:
     app = Flask(
         __name__, template_folder="vulcan/client", static_folder="vulcan/client/static"
     )
-    app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["SECRET_KEY"] = os.environ.get("VULCAN_SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
     @app.route("/status/", methods=["GET"])
@@ -52,6 +51,7 @@ def create_app() -> Flask:
         except Exception as e:
             log.exception(f"An exception occurred while parsing the data: {e}")
             return {"ok": False}, 500
+        
         return {"ok": True}, 200
 
     @socketio.on("connect")
@@ -63,8 +63,6 @@ def create_app() -> Flask:
 
         print("Connected!")
         sid = request.sid
-
-        # TODO: investigate if we can serialize the layout instead.
 
         if sid in session:
             layout = session[sid]
@@ -105,8 +103,3 @@ def create_app() -> Flask:
         db.create_all()
 
     return app
-
-
-if __name__ == "__main__":
-    app = create_app()
-    socketio.run(app, debug=True)
