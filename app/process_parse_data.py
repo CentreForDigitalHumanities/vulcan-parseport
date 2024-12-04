@@ -1,5 +1,8 @@
 import base64
 from datetime import datetime
+
+from flask import Request
+from flask_sqlalchemy import SQLAlchemy
 from db.models import ParseResult
 from logger import log
 
@@ -12,7 +15,10 @@ class InvalidInput(Exception):
     pass
 
 
-def process_parse_data(request, db) -> None:
+def process_parse_data(request: Request, db: SQLAlchemy) -> None:
+    """
+    Validates the request data and stores the parse results in the database.
+    """
     parse_results, uuid = validate_input(request)
 
     # Store in DB
@@ -31,7 +37,7 @@ def validate_input(request) -> tuple[bytes | None, str | None]:
     object containing two properties:
     - `parse_data`: a base64-encoded string representing the pickle/binary
         parse results;
-    - `uuid`: a string representing the UUID of the parse request.
+    - `id`: an ID unique referencing the parse request.
 
     If the input is invalid, the function will raise an InvalidInput exception.
     """
