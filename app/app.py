@@ -1,22 +1,27 @@
 import os
 from flask import Flask, request, session
 from flask_socketio import SocketIO, emit
-from logger import log
+
 from vulcan.file_loader import create_layout_from_filepath
+from vulcan.search.search import create_list_of_possible_search_filters
+from vulcan.data_handling.data_corpus import CorpusSlice
+
+from logger import log
 from server_methods import instance_requested
 from process_parse_data import process_parse_data
 from db.models import db
-
+from get_user_layout import get_user_layout
 
 # TODO: Handle CORS properly.
 socketio = SocketIO(cors_allowed_origins="*")
+
 
 def create_app() -> Flask:
     log.info("Creating app...")
 
     log.info("Creating standard layout...")
     standard_layout = create_layout_from_filepath(
-        # Petit Prince
+        # Petit Prince, used while in dev.
         input_path="./little_prince_simple.pickle",
         # Test pickle from Meaghan, should be used if no input is provided.
         # input_path="./all.pickle",
@@ -25,9 +30,8 @@ def create_app() -> Flask:
     )
     log.info("Standard layout created.")
 
-    app = Flask(
-        __name__, template_folder="vulcan/client", static_folder="vulcan/client/static"
-    )
+    app = Flask(__name__)
+    # TODO: handle secret key/env correctly.
     app.config["SECRET_KEY"] = os.environ.get("VULCAN_SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
@@ -46,35 +50,49 @@ def create_app() -> Flask:
         After validating the input, the input is stored in a SQLite database
         along with the UUID and a timestamp.
         """
+        log.debug("Handling parse request!")
         try:
             process_parse_data(request, db)
         except Exception as e:
             log.exception(f"An exception occurred while parsing the data: {e}")
             return {"ok": False}, 500
-        
+
+        log.debug("Data processed!")
+
         return {"ok": True}, 200
 
     @socketio.on("connect")
     def handle_connect():
-        from vulcan.server.server import (
-            make_layout_sendable,
-            create_list_of_possible_search_filters,
-        )
+        log.debug("Connected!")
 
-        print("Connected!")
+        user_layout = get_user_layout(request, db)
+        if user_layout is None:
+            log.info("No layout found for user. Using standard layout.")
+            layout = standard_layout
+        else:
+            layout = user_layout
+
+        # The following two methods are copied from vulcan.server.server, but
+        # if we import that file, the server will crash.
+        def make_slice_sendable(corpus_slice: CorpusSlice):
+            ret = {
+                "name": corpus_slice.name,
+                "visualization_type": corpus_slice.visualization_type,
+            }
+            return ret
+
+        def make_layout_sendable(layout):
+            ret = []
+            for row in layout.layout:
+                ret.append([make_slice_sendable(s) for s in row])
+            return ret
+
         sid = request.sid
 
-        if sid in session:
-            layout = session[sid]
-        else:
-            layout = standard_layout
-
         show_node_names = session.get("show_node_names")
-        print("Layout for session:", layout)
-        print("Client connected with SID", sid)
+        log.info("Layout for session:", layout)
 
         try:
-            print(sid, "connected")
             emit("set_layout", make_layout_sendable(layout), to=sid)
             emit("set_corpus_length", layout.corpus_size, to=sid)
             emit("set_show_node_names", {"show_node_names": show_node_names}, to=sid)
@@ -90,7 +108,7 @@ def create_app() -> Flask:
 
     @socketio.on("disconnect")
     def handle_disconnect():
-        print("Client disconnected")
+        log.debug("Client disconnected")
 
     @socketio.on("instance_requested")
     def handle_instance_requested(index):
@@ -99,7 +117,7 @@ def create_app() -> Flask:
     socketio.init_app(app)
     db.init_app(app)
 
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+        db.create_all()
 
     return app

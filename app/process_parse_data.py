@@ -20,6 +20,7 @@ def process_parse_data(request: Request, db: SQLAlchemy) -> None:
     Validates the request data and stores the parse results in the database.
     """
     parse_results, uuid = validate_input(request)
+    log.debug('Input validated')
 
     # Store in DB
     new_result = ParseResult(
@@ -29,6 +30,8 @@ def process_parse_data(request: Request, db: SQLAlchemy) -> None:
     )
     db.session.add(new_result)
     db.session.commit()
+
+    log.debug('Data stored in DB')
 
 
 def validate_input(request) -> tuple[bytes | None, str | None]:
