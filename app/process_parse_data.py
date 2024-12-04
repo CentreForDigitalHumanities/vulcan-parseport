@@ -37,7 +37,7 @@ def validate_input(request) -> tuple[bytes | None, str | None]:
     object containing two properties:
     - `parse_data`: a base64-encoded string representing the pickle/binary
         parse results;
-    - `id`: an ID unique referencing the parse request.
+    - `id`: an ID uniquely referencing the parse request.
 
     If the input is invalid, the function will raise an InvalidInput exception.
     """
@@ -48,28 +48,28 @@ def validate_input(request) -> tuple[bytes | None, str | None]:
         raise InvalidInput("No JSON data received.")
 
     # Check if the request contains the necessary keys
-    if "parse_data" not in request.json or "uuid" not in request.json:
+    if "parse_data" not in request.json or "id" not in request.json:
         log.error("Missing keys in JSON data.")
         raise InvalidInput("Missing keys in JSON data.")
 
-    # Extract the parse data and the UUID
+    # Extract the parse data and the ID
     parse_data = request.json.get("parse_data")
-    uuid = request.json.get("uuid")
+    id = request.json.get("id")
 
     # Check if the parse data is valid
     if not parse_data or not isinstance(parse_data, str):
         log.error("No valid parse data received.")
         raise InvalidInput("No valid parse data received.")
 
-    # Check if the UUID is valid
-    if not uuid or not isinstance(uuid, str):
-        log.error("No valid UUID received.")
-        raise InvalidInput("No valid UUID received.")
+    # Check if the ID is valid
+    if not id or not isinstance(id, str):
+        log.error("No valid id received.")
+        raise InvalidInput("No valid id received.")
 
     try:
-        base64.b64decode(parse_data)
+        decoded = base64.b64decode(parse_data)
     except Exception as e:
         log.error("Could not decode base64 data:", e)
         raise InvalidInput("Could not decode base64 data.")
 
-    return parse_data, uuid
+    return decoded, id
