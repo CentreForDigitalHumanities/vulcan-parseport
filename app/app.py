@@ -7,8 +7,8 @@ from server_methods import instance_requested
 
 # from process_parse_data import process_parse_data
 
-socketio = SocketIO()
-
+# TODO: Handle CORS properly.
+socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app() -> Flask:
     log.info("Creating app...")
@@ -99,9 +99,5 @@ def create_app() -> Flask:
     def handle_instance_requested(index):
         instance_requested(request.sid, standard_layout, index)
 
+    socketio.init_app(app)
     return app
-
-
-if __name__ == "__main__":
-    app = create_app()
-    socketio.run(app, debug=True)
