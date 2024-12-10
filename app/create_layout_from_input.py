@@ -1,17 +1,15 @@
-import json
-from vulcan.server.basic_layout import BasicLayout
+import pickle
+from vulcan.file_loader import BasicLayout
 from vulcan.data_handling.data_corpus import from_dict_list
 
-def create_layout_from_input(data: list[dict]) -> BasicLayout:
+def create_layout_from_input(parse_results: bytes) -> BasicLayout:
     """
-    Create a layout from the given data.
-
-    Simplified version of vulcan.file_loader.create_layout_from_filepath.
+    Create a layout from MG Parser's parse results (in binary/pickle format).
     """
-    input_dicts = json.load(data)
+    dict_lists = pickle.loads(parse_results)
 
     data_corpus = from_dict_list(
-        data=input_dicts,
+        data=dict_lists,
         propbank_frames_path=None,
         show_wikipedia=False
     )
@@ -23,4 +21,3 @@ def create_layout_from_input(data: list[dict]) -> BasicLayout:
     )
 
     return layout
-    

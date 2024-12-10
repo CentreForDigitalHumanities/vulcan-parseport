@@ -1,10 +1,13 @@
+import pickle
 import base64
 from datetime import datetime
 
 from flask import Request
 from flask_sqlalchemy import SQLAlchemy
+
 from db.models import ParseResult
 from logger import log
+from create_layout_from_input import create_layout_from_input
 
 
 class InvalidInput(Exception):
@@ -17,16 +20,21 @@ class InvalidInput(Exception):
 
 def process_parse_data(request: Request, db: SQLAlchemy) -> None:
     """
-    Validates the request data and stores the parse results in the database.
+    Validates the request data, converts the parse results to a Layout and
+    stores it in the database.
     """
-    parse_results, uuid = validate_input(request)
+    parse_results, input_id = validate_input(request)
     log.debug('Input validated')
+
+    user_layout = create_layout_from_input(parse_results)
+
+    pickled = pickle.dumps(user_layout)
 
     # Store in DB
     new_result = ParseResult(
-        uuid=uuid,
         timestamp=datetime.now(),
-        data=parse_results,
+        input_id=input_id,
+        layout=pickled,
     )
     db.session.add(new_result)
     db.session.commit()
@@ -57,7 +65,7 @@ def validate_input(request) -> tuple[bytes | None, str | None]:
 
     # Extract the parse data and the ID
     parse_data = request.json.get("parse_data")
-    id = request.json.get("id")
+    input_id = request.json.get("id")
 
     # Check if the parse data is valid
     if not parse_data or not isinstance(parse_data, str):
@@ -65,7 +73,7 @@ def validate_input(request) -> tuple[bytes | None, str | None]:
         raise InvalidInput("No valid parse data received.")
 
     # Check if the ID is valid
-    if not id or not isinstance(id, str):
+    if not input_id or not isinstance(input_id, str):
         log.error("No valid id received.")
         raise InvalidInput("No valid id received.")
 
@@ -75,4 +83,4 @@ def validate_input(request) -> tuple[bytes | None, str | None]:
         log.error("Could not decode base64 data:", e)
         raise InvalidInput("Could not decode base64 data.")
 
-    return decoded, id
+    return decoded, input_id

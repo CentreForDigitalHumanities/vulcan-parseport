@@ -1,3 +1,4 @@
+import pickle
 from flask import Request
 from flask_sqlalchemy import SQLAlchemy
 from vulcan.file_loader import BasicLayout
@@ -17,26 +18,28 @@ def get_user_layout(request: Request, db: SQLAlchemy) -> BasicLayout | None:
     database, or if multiple layouts are found for the user, None will be 
     returned.
     """
-    layout_id = request.args.get("id")
+    input_id = request.args.get("id")
 
-    if layout_id is None:
+    if input_id is None:
         log.info("No layout ID provided.")
         return None
 
+    layout = None
     try:
-        parse_result = db.session.query(ParseResult).filter_by(user_id=layout_id).one()
-
-        # layout = create_layout_from_parse_result(parse_result)
-        layout = None
-
-        return layout
+        query_result = db.session.query(ParseResult).filter_by(input_id=input_id).one()
+        pickled_layout = query_result.layout
+        layout = pickle.loads(pickled_layout)
+    except pickle.UnpicklingError:
+        log.error(
+            f"An error occurred while unpickling the layout for ID {input_id}."
+        )
     except NoResultFound:
         log.error(
-            f"No layout found with ID {layout_id}."
+            f"No layout found with ID {input_id}."
         )
-        return None
     except MultipleResultsFound:
         log.error(
-            f"Multiple layouts found with ID {layout_id}."
+            f"Multiple layouts found with ID {input_id}."
         )
-        return None
+    
+    return layout
