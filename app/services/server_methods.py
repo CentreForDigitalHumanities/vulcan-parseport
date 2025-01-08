@@ -6,7 +6,10 @@ from logger import log
 
 from vulcan.data_handling.visualization_type import VisualizationType
 from vulcan.server.basic_layout import BasicLayout
+from vulcan.search.search import SearchFilter
 
+# These methods are copied from vulcan.server.server. 
+# We cannot import that file directly, since it crashes the app.
 
 def cell_coordinates_to_cell_name(row: int, column: int) -> str:
     return f"({row}, {column})"
@@ -176,3 +179,18 @@ def instance_requested(sid: str, layout: BasicLayout, data: Any):
     except Exception as e:
         log.exception(e)
         emit("server_error", to=sid)
+
+
+def get_search_filters_from_data(data) -> list[SearchFilter]:
+    search_filters = []
+    for search_filter_data in data:
+        search_filters.append(
+            SearchFilter(
+                search_filter_data["slice_name"],
+                search_filter_data["outer_layer_id"],
+                search_filter_data["inner_layer_ids"],
+                search_filter_data["inner_layer_inputs"],
+                search_filter_data["color"],
+            )
+        )
+    return search_filters

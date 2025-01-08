@@ -3,8 +3,8 @@ from flask_socketio import emit
 from vulcan.data_handling.data_corpus import CorpusSlice
 from vulcan.file_loader import BasicLayout
 from vulcan.search.search import create_list_of_possible_search_filters
-from server_methods import instance_requested
 
+from .server_methods import instance_requested
 from logger import log
 
 
