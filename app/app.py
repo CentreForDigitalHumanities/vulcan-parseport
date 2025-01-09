@@ -68,9 +68,6 @@ def create_app() -> Flask:
     def handle_connect():
         log.debug("Client connected")
 
-        # TODO: this should be done in a cronjob.
-        remove_old_layouts(db)
-
         layout = get_and_unpack_layout(request, db)
         if layout is None:
             log.info("No layout found for user. Using standard layout.")
