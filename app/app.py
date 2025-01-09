@@ -108,11 +108,17 @@ def create_app() -> Flask:
         """Return the base layout on which the current layout is based."""
         log.debug("Clearing search.")
         layout = get_stored_layout(request, db)
-        if layout is None or layout.based_on is None:
+        if layout is None:
             log.info(
-                f"No layout found for user on clearing search. Using standard layout."
+                f"No layout found for user on clearing search."
             )
             emit("route_to_layout", "", to=request.sid)
+            return
+        
+        if layout.based_on is None:
+            log.info(
+                f"No base layout found for user on clearing search."
+            )
             return
 
         layout_data = unpack_layout(layout.based_on)

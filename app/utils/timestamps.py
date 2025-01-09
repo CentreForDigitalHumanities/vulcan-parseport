@@ -13,29 +13,25 @@ def update_timestamp(db: SQLAlchemy, stored_layout: StoredLayout) -> None:
     """
     Updates the timestamp of a StoredLayout object and its associated objects to the current time.
     """
-    log.debug("Updating timestamp for layout:", stored_layout.id)
+    log.debug(f"Updating timestamp for layout {stored_layout.id}")
 
     new_timestamp = datetime.now()
 
     stored_layout.timestamp = new_timestamp
     log.debug(
-        "Updated timestamp for layout:", stored_layout.id, stored_layout.timestamp
+        f"Updated timestamp for layout: {stored_layout.id} ({stored_layout.timestamp})"
     )
 
     if stored_layout.based_on:
         stored_layout.based_on.timestamp = new_timestamp
         log.debug(
-            "Updated timestamp for base layout:",
-            stored_layout.id,
-            stored_layout.timestamp,
+            f"Updated timestamp for base layout: {stored_layout.based_on.id} ({stored_layout.based_on.timestamp})",
         )
 
     for derived_layout in stored_layout.derived_layouts:
         derived_layout.timestamp = new_timestamp
         log.debug(
-            "Updated timestamp for derived layout:",
-            stored_layout.id,
-            stored_layout.timestamp,
+            f"Updated timestamp for derived layout: {derived_layout.id} ({derived_layout.timestamp})"
         )
 
     db.session.commit()
@@ -59,9 +55,9 @@ def remove_old_layouts(db: SQLAlchemy) -> None:
     for layout in old_layouts:
         children = layout.derived_layouts
         for child in children:
-            log.debug("Deleting child layout:", child.id, child.timestamp)
+            log.debug(f"Deleting child layout: {child.id} ({child.timestamp})")
             db.session.delete(child)
-        log.debug("Deleting (parent) layout:", layout.id, layout.timestamp)
+        log.debug(f"Deleting (parent) layout: {layout.id} ({layout.timestamp})")
         db.session.delete(layout)
 
     db.session.commit()
