@@ -61,3 +61,5 @@ def remove_old_layouts(db: SQLAlchemy) -> None:
         db.session.delete(layout)
 
     db.session.commit()
+
+    log.debug("Old layouts removed")
