@@ -12,10 +12,10 @@ from services.get_user_layout import (
     get_stored_layout,
     get_and_unpack_layout,
     unpack_layout,
+    get_base_layout,
 )
 from services.send_layout_to_client import send_layout_to_client
 from services.search import handle_search
-from utils.timestamps import remove_old_layouts
 
 # TODO: Handle CORS properly.
 socketio = SocketIO(cors_allowed_origins="*")
@@ -105,17 +105,20 @@ def create_app() -> Flask:
         """Return the base layout on which the current layout is based."""
         log.debug("Clearing search.")
         layout = get_stored_layout(request, db)
+
         if layout is None:
             log.info(f"No layout found for user on clearing search.")
             emit("route_to_layout", "", to=request.sid)
             return
+        
+        base_layout = get_base_layout(layout, db)
 
-        if layout.based_on is None:
-            log.info(f"No base layout found for user on clearing search.")
+        if base_layout is None:
+            log.info(f"No base layout found for layout with ID {layout.parse_id}.")
             return
 
-        layout_data = unpack_layout(layout.based_on)
-        identifier = layout.based_on.parse_id
+        layout_data = unpack_layout(base_layout)
+        identifier = base_layout.parse_id
 
         emit("set_corpus_length", layout_data.corpus_size, to=request.sid)
         log.debug("Clearing search successful. Rerouting to base layout.")
