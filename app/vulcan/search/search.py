@@ -26,6 +26,15 @@ class SearchFilter:
         self.inner_search_layer_arguments = inner_search_layer_arguments
         self.color = color
 
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "corpus_slice_name": self.corpus_slice_name,
+            "outer_search_layer_name": self.outer_search_layer_name,
+            "inner_search_layer_names": self.inner_search_layer_names,
+            "inner_search_layer_arguments": self.inner_search_layer_arguments,
+            "color": self.color
+        }
+
 
 def perform_search_on_layout(layout: BasicLayout,
                              filters: List[SearchFilter]) -> 'BasicLayout':

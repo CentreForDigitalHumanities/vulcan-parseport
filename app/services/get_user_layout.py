@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from vulcan.file_loader import BasicLayout
+from vulcan.search.search import SearchFilter
 
 from db.models import StoredLayout
 from logger import log
@@ -78,3 +79,15 @@ def get_and_unpack_layout(request: Request, db: SQLAlchemy) -> BasicLayout | Non
     if stored_layout is None:
         return None
     return unpack_layout(stored_layout)
+
+
+def unpack_search_filters(pickled_filters: bytes) -> list[SearchFilter]:
+    """
+    Transform the pickled search filters to a list of SearchFilter objects.
+    """
+    try:
+        search_filters = pickle.loads(pickled_filters)
+    except pickle.UnpicklingError:
+        log.error("An error occurred while unpickling the search filters.")
+        return []
+    return search_filters

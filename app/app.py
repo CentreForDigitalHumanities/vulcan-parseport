@@ -13,6 +13,7 @@ from services.get_user_layout import (
     get_and_unpack_layout,
     unpack_layout,
     get_base_layout,
+    unpack_search_filters,
 )
 from services.send_layout_to_client import send_layout_to_client
 from services.search import handle_search
@@ -68,13 +69,21 @@ def create_app() -> Flask:
     def handle_connect():
         log.debug("Client connected")
 
-        layout = get_and_unpack_layout(request, db)
-        if layout is None:
+        stored_layout = get_stored_layout(request, db)
+        if stored_layout:
+            layout = unpack_layout(stored_layout)
+            search_filters = (
+                unpack_search_filters(stored_layout.search_filters)
+                if stored_layout.search_filters
+                else []
+            )
+        else:
             log.info("No layout found for user. Using standard layout.")
             layout = standard_layout
+            search_filters = []
 
         sid = request.sid
-        send_layout_to_client(sid, layout)
+        send_layout_to_client(sid, layout, search_filters)
 
     @socketio.on("disconnect")
     def handle_disconnect():
@@ -110,7 +119,7 @@ def create_app() -> Flask:
             log.info(f"No layout found for user on clearing search.")
             emit("route_to_layout", "", to=request.sid)
             return
-        
+
         base_layout = get_base_layout(layout, db)
 
         if base_layout is None:

@@ -8,8 +8,9 @@ from vulcan.data_handling.visualization_type import VisualizationType
 from vulcan.server.basic_layout import BasicLayout
 from vulcan.search.search import SearchFilter
 
-# These methods are copied from vulcan.server.server. 
+# These methods are copied from vulcan.server.server.
 # We cannot import that file directly, since it crashes the app.
+
 
 def cell_coordinates_to_cell_name(row: int, column: int) -> str:
     return f"({row}, {column})"
@@ -138,7 +139,7 @@ def instance_requested(sid: str, layout: BasicLayout, data: Any):
                             highlights,
                             dependency_tree,
                         )
-                        emit('set_table', send_data, to=sid)
+                        emit("set_table", send_data, to=sid)
                     elif corpus_slice.visualization_type == VisualizationType.TABLE:
                         send_data = send_string_table(
                             corpus_slice.name,
@@ -147,7 +148,7 @@ def instance_requested(sid: str, layout: BasicLayout, data: Any):
                             highlights,
                             dependency_tree,
                         )
-                        emit('set_table', send_data, to=sid)
+                        emit("set_table", send_data, to=sid)
                     elif corpus_slice.visualization_type == VisualizationType.TREE:
                         # trees are just graphs without reentrancies
                         send_data = send_graph(
@@ -156,7 +157,7 @@ def instance_requested(sid: str, layout: BasicLayout, data: Any):
                             label_alternatives_by_node_name,
                             highlights,
                         )
-                        emit('set_graph', send_data, to=sid)
+                        emit("set_graph", send_data, to=sid)
                     elif corpus_slice.visualization_type == VisualizationType.GRAPH:
                         send_data = send_graph(
                             corpus_slice.name,
@@ -165,7 +166,7 @@ def instance_requested(sid: str, layout: BasicLayout, data: Any):
                             highlights,
                             mouseover_texts,
                         )
-                        emit('set_graph', send_data, to=sid)
+                        emit("set_graph", send_data, to=sid)
             for linker in layout.linkers:
                 sent_data = send_linker(
                     linker["name1"],

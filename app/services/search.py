@@ -5,7 +5,7 @@ from flask import Request
 from flask_sqlalchemy import SQLAlchemy
 
 from vulcan.file_loader import BasicLayout
-from vulcan.search.search import perform_search_on_layout
+from vulcan.search.search import perform_search_on_layout, SearchFilter
 
 from db.models import StoredLayout
 from logger import log
@@ -14,10 +14,12 @@ from services.get_user_layout import get_stored_layout, unpack_layout
 from utils.generate_parse_id import generate_parse_id
 
 
-def handle_search(request: Request, db: SQLAlchemy, search_data: dict, standard_layout: BasicLayout) -> str:
+def handle_search(
+    request: Request, db: SQLAlchemy, search_data: dict, standard_layout: BasicLayout
+) -> str:
     """
     Extract the user's current layout, apply search filters, save the result
-    under a newly created identifier and return the identifier to the client 
+    under a newly created identifier and return the identifier to the client
     so the user can navigate to it.
 
     If we cannot find a layout, we simply use the standard layout.
@@ -36,41 +38,41 @@ def handle_search(request: Request, db: SQLAlchemy, search_data: dict, standard_
         layout = unpack_layout(stored_layout)
         base_id = stored_layout.parse_id
     else:
-        # The user's current layout is itself based on another layout, so 
+        # The user's current layout is itself based on another layout, so
         # we use that as our base.
         layout = unpack_layout(stored_layout.based_on)
         base_id = stored_layout.based_on.parse_id
 
-    searched_layout = search_layout(layout, search_data, db)
-    identifier = save_search_result(searched_layout, db, base_id)
+    # Converts the filters of type FilterInfo (JS) to SearchFilter (Python).
+    search_filters = get_search_filters_from_data(search_data)
+    searched_layout = perform_search_on_layout(layout, search_filters)
+
+    identifier = save_search_result_and_filters(
+        searched_layout, search_filters, db, base_id
+    )
 
     return identifier
 
 
-
-def search_layout(layout: BasicLayout, search_data: dict, db: SQLAlchemy) -> str:
+def save_search_result_and_filters(
+    layout: BasicLayout,
+    search_filters: list[SearchFilter],
+    db: SQLAlchemy,
+    base_id: int,
+) -> str:
     """
-    Performs a search on a layout and returns the result.
+    Save the search result and the associated filters in the database.
     """
-    # Apply search parameters
-    search_filters = get_search_filters_from_data(search_data)
-    searched_layout = perform_search_on_layout(layout, search_filters)
-
-    return searched_layout
-
-
-def save_search_result(layout: BasicLayout, db: SQLAlchemy, base_id: int) -> str:
-    """
-    Save the search result in the database.
-    """
-    pickled = pickle.dumps(layout)
+    pickled_layout = pickle.dumps(layout)
+    pickled_search_filters = pickle.dumps(search_filters)
 
     identifier = generate_parse_id()
 
     new_result = StoredLayout(
         timestamp=datetime.now(),
         parse_id=identifier,
-        layout=pickled,
+        layout=pickled_layout,
+        search_filters=pickled_search_filters,
         based_on_id=base_id,
     )
     db.session.add(new_result)
