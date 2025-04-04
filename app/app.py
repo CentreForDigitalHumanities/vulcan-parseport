@@ -123,7 +123,11 @@ def create_app() -> Flask:
         base_layout = get_base_layout(layout, db)
 
         if base_layout is None:
-            log.info(f"No base layout found for layout with ID {layout.parse_id}.")
+            log.info(
+                f"""No base layout found for layout with ID {layout.parse_id}.
+                Returning to standard layout."""
+            )
+            emit("route_to_layout", "", to=request.sid)
             return
 
         layout_data = unpack_layout(base_layout)
