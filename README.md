@@ -84,7 +84,20 @@ To run the server locally, you need to have Python 3.12 or higher installed (low
     pip install -r requirements.txt
     ```
 
-3. Start the development server by running the following command in the `/app` folder:
+3. Generate a secret key and set it as the value of the VULCAN_SECRET_KEY environment variable. How this is done differs per operating system.
+
+    On Linux-based systems:
+    ```bash
+    export VULCAN_SECRET_KEY='<your-secret-key-here>'
+    ```
+
+    In PowerShell on Windows:
+    ```powershell
+    $Env:VULCAN_SECRET_KEY='<your-secret-key-here>'
+    ```
+
+
+4. Start the development server by running the following command in the `/app` folder:
 
     ```bash
     flask run --host 0.0.0.0
