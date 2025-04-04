@@ -10,7 +10,7 @@ This project contains the code for a web-based visualization tool, run on a Flas
 
 The server is designed to receive parse results from the Minimalist Parser and turn them into so-called 'Layout' objects that can be sent to a client. In the browser, these Layouts are used to build navigable trees representing the parse result in the shape of syntactic tree structures. 
 
-The server is designed to be run in a Docker container, as part of the ParsePort container network, but can also be run locally for development purposes.
+The server is designed to be run in a Docker container but can also be run locally for development purposes, see below for instructions.
 
 The client-side files for Vulcan are also available in this repository (in `/vulcan/client`) for reference purposes only. They are not served by the Flask server. In the context of the ParsePort project, these files are served by the NGINX server that is part of the ParsePort container network.
 
@@ -55,7 +55,7 @@ It is recommended to periodically clean up the database by running `remove_old_l
 The server can be run in three different ways:
 
 1. Locally, using Flask's built-in development server.
-2. In a Docker container.
+2. In a standalone Docker container.
 3. As part of the ParsePort container network, using Docker Compose.
 
 To run the server locally, you need to have Python 3.12 or higher installed (lower versions may work but have not been tested).
@@ -95,15 +95,42 @@ To run the server locally, you need to have Python 3.12 or higher installed (low
 
 ### Running the server in a Docker container
 
-To run the server in a stand-alone container, run the following commands in the root directory of the project:
+The server can be run in a Docker container in two ways, either as a standalone container or as part of the ParsePort container network. This requires Docker to be installed on your machine. 
+
+#### Running Vulcan-ParsePort in a standalone Docker container
+
+The project expects an `.env` file in the root directory of the project. This file should contain at least the following line. (Consult `.env.example` for an example.)
+
+```properties
+VULCAN_SECRET_KEY='your-secret-key-here'
+```
+
+Optionally, you may add:
+
+```properties
+# Starts the server in debug mode.
+FLASK_DEBUG=1
+
+# Specifies the port on which the application will run (default is 32771).
+VULCAN_PORT=your-port-here
+```
+
+Then, build and run your container using the following commands:
 
 ```bash
 docker build -t vulcan-parseport .
-docker run -d -p 5000:5000 --name vulcan-parseport vulcan-parseport
+docker run -d -p 5000:32771 --env-file .env --name vulcan-parseport vulcan-parseport
 ```
 
-This will build the Docker image and run a container with the image. The server will be available at `http://localhost:5000`. You can add `-v ./app:/app:rw` to the `docker run` command to mount the `app` directory to the container, which enables auto-reload whenever the code in `app` is changed.
+If you specified a different port in the `.env` file, replace `32771` with that port number.
 
-### Running the server as part of the ParsePort container network
+**Tip:** Add `-d` to run the container in detached mode and keep your terminal clean.
 
-Please refer to the ParsePort documentation for instructions on how to run the server as part of the ParsePort container network.
+**Tip:** If you are running the Flask server in debug mode (with live reloading), adding `-v .:/app:rw` to the `docker run` command in Step 6 will mount the current directory to the container. Upon making changes to the code, the server will automatically reload.
+
+The server should now be running and reachable on `http://localhost:5000`.
+
+#### Running Vulcan-ParsePort within the ParsePort container network
+
+No `.env` file is needed in this case, as the ParsePort container network will provide the necessary environment variables. Please consult the [ParsePort documentation](https://github.com/CentreForDigitalHumanities/parseport) for more information.
+

@@ -20,12 +20,15 @@ COPY app /app
 WORKDIR /app
 
 ENV FLASK_APP=app.py
-ENV FLASK_DEBUG=$VULCAN_DEBUG
-ENV VULCAN_PORT=$VULCAN_PORT
-ENV VULCAN_SECRET_KEY=$VULCAN_SECRET_KEY
+ENV FLASK_DEBUG=0
+ENV VULCAN_PORT=32771
+ENV VULCAN_SECRET_KEY="insecure-key"
 
 # Expose the port
 EXPOSE $VULCAN_PORT
 
-# Run server
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Add entrypoint script and make it executable
+COPY ./entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
