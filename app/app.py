@@ -27,6 +27,19 @@ STANDARD_LAYOUT_INPUT_PATH = "./standard.pickle"
 # STANDARD_LAYOUT_INPUT_PATH = "./little_prince_simple.pickle"
 
 
+def get_secret_key() -> str:
+    """
+    Get the secret key from the environment variable VULCAN_SECRET_KEY.
+    If not set, raise an error.
+    """
+    secret_key = os.environ.get("VULCAN_SECRET_KEY")
+    if secret_key is None or secret_key == "insecure-key":
+        raise ValueError(
+            "VULCAN_SECRET_KEY environment variable not set. Please consult the README for more information."
+        )
+    return secret_key
+
+
 def create_app() -> Flask:
     log.info("Creating app...")
 
@@ -40,8 +53,7 @@ def create_app() -> Flask:
     log.info("Standard layout created.")
 
     app = Flask(__name__)
-    # TODO: handle secret key/env correctly.
-    app.config["SECRET_KEY"] = os.environ.get("VULCAN_SECRET_KEY")
+    app.config["SECRET_KEY"] = get_secret_key()
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
     # HTTP route handlers

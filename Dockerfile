@@ -27,8 +27,5 @@ ENV VULCAN_SECRET_KEY="insecure-key"
 # Expose the port
 EXPOSE $VULCAN_PORT
 
-# Add entrypoint script and make it executable
-COPY ./entrypoint.sh .
-RUN chmod +x entrypoint.sh
-
-ENTRYPOINT ["./entrypoint.sh"]
+# Start the application.
+CMD flask run --host=0.0.0.0 --port=${VULCAN_PORT}
