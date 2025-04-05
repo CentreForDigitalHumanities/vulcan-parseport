@@ -12,3 +12,5 @@ ud_japanese_pud_test.pickle
 ud_japanese_bccwj_dev.pickle
 vulcan/examples/ja_bccwj-ud-dev.conllu
 output.txt
+
+.venv

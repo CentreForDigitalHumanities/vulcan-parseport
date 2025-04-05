@@ -1,0 +1,1 @@
+[{"type": "data", "format": "string", "instances": ["The dog chased the cat.", "The cat chased the dog."], "name": "Sentence"}, {"type": "data", "format": "nltk_tree_string", "instances": ["(S (NP (D the) (N dog)) (VP (V chased) (NP (D the) (N cat))))", "(S (NP (D the) (N cat)) (VP (V chased) (NP (D the) (N dog))))"], "name": "Tree"}]
