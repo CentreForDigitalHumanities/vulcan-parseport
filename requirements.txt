@@ -31,11 +31,17 @@ dnspython==2.7.0
 eventlet==0.37.0
     # via -r requirements.in
 flask==3.1.0
-    # via flask-socketio
+    # via
+    #   flask-socketio
+    #   flask-sqlalchemy
 flask-socketio==5.4.1
     # via -r requirements.in
+flask-sqlalchemy==3.1.1
+    # via -r requirements.in
 greenlet==3.1.1
-    # via eventlet
+    # via
+    #   eventlet
+    #   sqlalchemy
 h11==0.14.0
     # via wsproto
 idna==3.10
@@ -57,9 +63,7 @@ penman==1.3.1
 python-engineio==4.10.1
     # via python-socketio
 python-socketio==5.11.4
-    # via
-    #   -r requirements.in
-    #   flask-socketio
+    # via flask-socketio
 regex==2024.9.11
     # via nltk
 requests==2.32.3
@@ -68,8 +72,12 @@ simple-websocket==1.1.0
     # via python-engineio
 soupsieve==2.6
     # via beautifulsoup4
+sqlalchemy==2.0.36
+    # via flask-sqlalchemy
 tqdm==4.66.6
     # via nltk
+typing-extensions==4.12.2
+    # via sqlalchemy
 urllib3==2.2.3
     # via requests
 werkzeug==3.1.3

@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED=1
 
 # Install dependencies
 RUN apt update
-RUN apt install -y gettext
+
+# Install Gunicorn for production image
 RUN pip install gunicorn
 
 # Copy requirements file

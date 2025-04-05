@@ -1,8 +1,8 @@
 # VULCAN -- ParsePort
 
-This is a fork of the original VULCAN, developed and maintained by [Jonas Groschwitz (jgroschwitz)](https://github.com/jgroschwitz). Please refer to the [original repo](https://github.com/jgroschwitz/vulcan) for the original documentation, including setup and usage instructions.
+This is a fork of the original repository of VULCAN (Visualizations for Understanding Language Corpora and model predictioNs), developed and maintained by [dr. Jonas Groschwitz (jgroschwitz)](https://github.com/jgroschwitz). Please refer to the [original repo](https://github.com/jgroschwitz/vulcan) for the original documentation, including setup and usage instructions.
 
-This fork adapts VULCAN to be used within the ParsePort project as a visualization tool for syntactic parses made by the Minimalist Parser developed by [Meaghan Fowlie (megodoonch)](https://github.com/megodoonch) at Utrecht University. More documentation on ParsePort, developed at the Centre For Digital Humanities at Utrecht University, can be found [here](https://github.com/CentreForDigitalHumanities/parseport).
+This fork adapts VULCAN to be used within the ParsePort project as a visualization tool for syntactic parses made by the Minimalist Parser developed by [dr. Meaghan Fowlie (megodoonch)](https://github.com/megodoonch) at Utrecht University. More documentation on ParsePort, developed at the Centre For Digital Humanities at Utrecht University, can be found [here](https://github.com/CentreForDigitalHumanities/parseport).
 
 This project contains the code for a web-based visualization tool, run on a Flask webserver. The server accepts both regular HTTP requests and WebSocket connections. In addition, there is a small SQLite database to keep track of individual parse results.
 
@@ -10,20 +10,28 @@ This project contains the code for a web-based visualization tool, run on a Flas
 
 The server is designed to receive parse results from the Minimalist Parser and turn them into Layout objects that can be rendered in the browser. The server is designed to be run in a Docker container, and it is part of the ParsePort container network.
 
-The server's main endpoint is `/` and only accepts POST requests there with a JSON object of the following form.
+## API architecture
+
+### HTTP
+
+The server's main HTTP endpoint is `/`. It only accepts POST requests with a JSON object of the following form.
 
   ```json
   {
-    "uuid": "unique-identifier-for-parse",
-    "parse": "base64-encoded-parse-result",
+    "id": "unique-identifier-for-parse",
+    "parse_data": "base64-encoded-parse-result",
   }
   ```
 
-  The UUID is a unique identifier for the parse result, and the parse is a base64-encoded string of the parse result (originally in binary/bytes). The server decodes the parse result, converts it into a `Layout` object, and stores it in the database together with the UUID.
+The server decodes the parse result data, turns it into a Layout object and stores it in a SQLite database together with the ID and a timestamp. The server then sends a JSON response of the shape `{"ok": True}` with a status code of 200.
 
-  When a client connects to the server through WebSocket, the server sends the client the layout object corresponding to the UUID the client requested. The client then renders the layout object in the browser.
+In addition, HTTP GET requests to the `/status/` endpoint will return `{"ok": "true"}` if the server is running and ready to receive connections.
 
-  In addition to this main endpoint and WebSocket events, the server also has a `/status/` endpoint that returns `{"ok": "true"}` if the server is running and ready to receive connections.
+### WebSocket
+
+When a client connects to the server through WebSocket, it will do so at the `/socket.io/<id>` endpoint. The ID route parameter is optional.
+
+If no ID is provided, the server will return a standard Layout object, based on a pre-parsed corpus containing sentences from the Wall Street Journal. If an ID is provided, the server will look up the corresponding Layout object in the SQLite database and send it to the client.
 
 
 ## Running a local development server
