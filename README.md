@@ -40,13 +40,12 @@ The server handles the following WebSocket events:
 - `connect`: tells the server to establish a connection. The server will return a stored Layout (if an ID is provided) or the standard Layout to the client, where it can be rendered on screen.
 - `disconnect`: tells the server to close the connection.
 - `instance_requested`: provides a page number, or index, to the server. The server will return a Layout object based on the sentence at that index in the pre-parsed corpus.
-- `perform_search`: provides search parameters. The server looks up the user's Layout object (or the standard Layout if no ID is provided) an performs a search based on the parameters. This yields a new Layout object, which is stored in the database alongside a unique identifier and a reference to the original 'base' Layout. The server then sends the unique identifier back to the client. The client uses the identifier to construct the URL where it can find the search result. This URL can be shared with other users, who will then see the same search result.
-- `clear_search`: retrieves the base Layout for the current Layout. This is used to clear the search results and return to the original Layout. If the current Layout is not based on another Layout or if it is the standard Layout, this is a no-op.
-
+- `perform_search`: provides search parameters. The server then uses these parameters to perform a search on the standard Layout. The resulting new Layout object is stored in the database alongside a unique identifier, which is sent back to the client. The client uses the identifier to construct a new URL where it can find the search result. This URL can be shared with other users, who will then see the same search result.
+- `clear_search`: retrieves the base Layout for the current Layout. This is used to clear the search results and return the standard Layout.
 
 ## Layout cleanup
 
-Layouts that are stored in the database will be marked for cleanup if they have not been consulted for 90 days, as measured by the timestamp associated with the Layout in the database. Whenever Layout is requested, its timestamp is updated to the current time. If the Layout is based on another Layout, the timestamp of that base Layout is also updated.
+Layouts that are stored in the database will be marked for cleanup if they have not been consulted for 90 days, as measured by the timestamp associated with the Layout in the database. Whenever Layout is requested, its timestamp is updated to the current time.
 
 It is recommended to periodically clean up the database by running `remove_old_layouts.py`. This script will remove all Layouts that have been marked for cleanup. It is recommended to run this script periodically. The file `Crontab` can be used to schedule this script to run automatically on Linux-based machines that host the ParsePort Docker network.
 

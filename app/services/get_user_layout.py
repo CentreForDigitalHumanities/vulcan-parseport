@@ -40,22 +40,6 @@ def get_stored_layout(request: Request, db: SQLAlchemy) -> StoredLayout | None:
     return layout
 
 
-def get_base_layout(layout: StoredLayout, db: SQLAlchemy) -> StoredLayout | None:
-    """
-    Get the base layout for the given layout.
-    """
-    if layout.based_on_id is None:
-        return None
-    try:
-        base_layout = (
-            db.session.query(StoredLayout).filter_by(parse_id=layout.based_on_id).one()
-        )
-    except NoResultFound:
-        log.error(f"No base layout found for layout with ID {layout.parse_id}.")
-        return None
-    return base_layout
-
-
 def unpack_layout(layout_object: StoredLayout) -> BasicLayout | None:
     """
     Unpickles the layout data from a StoredLayout DB object.

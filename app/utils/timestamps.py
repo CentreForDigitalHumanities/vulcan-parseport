@@ -11,7 +11,7 @@ EXPIRATION_TIME_DAYS = 90
 
 def update_timestamp(db: SQLAlchemy, stored_layout: StoredLayout) -> None:
     """
-    Updates the timestamp of a StoredLayout object and its associated objects to the current time.
+    Updates the timestamp of a StoredLayout object to the current time.
     """
     log.debug(f"Updating timestamp for layout {stored_layout.id}")
 
@@ -22,24 +22,12 @@ def update_timestamp(db: SQLAlchemy, stored_layout: StoredLayout) -> None:
         f"Updated timestamp for layout: {stored_layout.id} ({stored_layout.timestamp})"
     )
 
-    if stored_layout.based_on:
-        stored_layout.based_on.timestamp = new_timestamp
-        log.debug(
-            f"Updated timestamp for base layout: {stored_layout.based_on.id} ({stored_layout.based_on.timestamp})",
-        )
-
-    for derived_layout in stored_layout.derived_layouts:
-        derived_layout.timestamp = new_timestamp
-        log.debug(
-            f"Updated timestamp for derived layout: {derived_layout.id} ({derived_layout.timestamp})"
-        )
-
     db.session.commit()
 
 
 def remove_old_layouts(db: SQLAlchemy) -> None:
     """
-    Removes layouts (and their children) if they are older than the expiration time.
+    Removes layouts if they are older than the expiration time.
     """
     log.debug("Removing old layouts")
 
@@ -51,13 +39,8 @@ def remove_old_layouts(db: SQLAlchemy) -> None:
         .all()
     )
 
-    # Child layouts are marked for deletion as well.
     for layout in old_layouts:
-        children = layout.derived_layouts
-        for child in children:
-            log.debug(f"Deleting child layout: {child.id} ({child.timestamp})")
-            db.session.delete(child)
-        log.debug(f"Deleting (parent) layout: {layout.id} ({layout.timestamp})")
+        log.debug(f"Deleting layout: {layout.id} ({layout.timestamp})")
         db.session.delete(layout)
 
     db.session.commit()

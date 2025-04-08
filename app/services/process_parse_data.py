@@ -31,8 +31,8 @@ def process_parse_data(request: Request, db: SQLAlchemy) -> None:
     pickled = pickle.dumps(user_layout)
 
     new_result = StoredLayout(
-        timestamp=datetime.now(),
         parse_id=input_id,
+        timestamp=datetime.now(),
         layout=pickled,
     )
     db.session.add(new_result)

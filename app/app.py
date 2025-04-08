@@ -12,7 +12,6 @@ from services.get_user_layout import (
     get_stored_layout,
     get_and_unpack_layout,
     unpack_layout,
-    get_base_layout,
     unpack_search_filters,
 )
 from services.send_layout_to_client import send_layout_to_client
@@ -105,37 +104,17 @@ def create_app() -> Flask:
         Perform a search on the current layout and reroute to it.
         """
         log.debug("Search requested")
-        result_identifier = handle_search(request, db, data, standard_layout)
+        result_identifier = handle_search(db, data, standard_layout)
         log.debug("Search successful. Rerouting to result.")
         emit("route_to_layout", result_identifier, to=request.sid)
 
     @socketio.on("clear_search")
     def clear_search():
-        """Return the base layout on which the current layout is based."""
+        """
+        Clear search: return to standard layout.
+        """
         log.debug("Clearing search.")
-        layout = get_stored_layout(request, db)
-
-        if layout is None:
-            log.info(f"No layout found for user on clearing search.")
-            emit("route_to_layout", "", to=request.sid)
-            return
-
-        base_layout = get_base_layout(layout, db)
-
-        if base_layout is None:
-            log.info(
-                f"""No base layout found for layout with ID {layout.parse_id}.
-                Returning to standard layout."""
-            )
-            emit("route_to_layout", "", to=request.sid)
-            return
-
-        layout_data = unpack_layout(base_layout)
-        identifier = base_layout.parse_id
-
-        emit("set_corpus_length", layout_data.corpus_size, to=request.sid)
-        log.debug("Clearing search successful. Rerouting to base layout.")
-        emit("route_to_layout", identifier, to=request.sid)
+        emit("route_to_layout", "", to=request.sid)
 
     socketio.init_app(app)
     db.init_app(app)
