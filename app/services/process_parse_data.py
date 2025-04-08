@@ -5,9 +5,9 @@ from datetime import datetime
 from flask import Request
 from flask_sqlalchemy import SQLAlchemy
 
-from db.models import ParseResult
+from db.models import StoredLayout
 from logger import log
-from create_layout_from_input import create_layout_from_input
+from services.create_layout_from_input import create_layout_from_input
 
 
 class InvalidInput(Exception):
@@ -20,8 +20,8 @@ class InvalidInput(Exception):
 
 def process_parse_data(request: Request, db: SQLAlchemy) -> None:
     """
-    Validates the request data, converts the parse results to a Layout and
-    stores it in the database.
+    Validates the parse data in the Request body, converts the parse results to
+    a BasicLayout object and stores it in the database.
     """
     parse_results, input_id = validate_input(request)
     log.debug('Input validated')
@@ -30,10 +30,9 @@ def process_parse_data(request: Request, db: SQLAlchemy) -> None:
 
     pickled = pickle.dumps(user_layout)
 
-    # Store in DB
-    new_result = ParseResult(
+    new_result = StoredLayout(
+        parse_id=input_id,
         timestamp=datetime.now(),
-        input_id=input_id,
         layout=pickled,
     )
     db.session.add(new_result)

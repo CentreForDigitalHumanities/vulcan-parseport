@@ -8,13 +8,17 @@ This project contains the code for a web-based visualization tool, run on a Flas
 
 ## Aim and functionality
 
-The server is designed to receive parse results from the Minimalist Parser and turn them into Layout objects that can be rendered in the browser. The server is designed to be run in a Docker container, and it is part of the ParsePort container network.
+The server is designed to receive parse results from the Minimalist Parser and turn them into so-called 'Layout' objects that can be sent to a client. In the browser, these Layouts are used to build navigable trees representing the parse result in the shape of syntactic tree structures. 
+
+The server is designed to be run in a Docker container, as part of the ParsePort container network, but can also be run locally for development purposes.
+
+The client-side files for Vulcan are also available in this repository (in `/vulcan/client`) for reference purposes only. They are not served by the Flask server. In the context of the ParsePort project, these files are served by the NGINX server that is part of the ParsePort container network.
 
 ## API architecture
 
 ### HTTP
 
-The server's main HTTP endpoint is `/`. It only accepts POST requests with a JSON object of the following form.
+The server's main HTTP endpoint is `/`, which is used to register new parse results and create new Layout objects. It only accepts POST requests with a JSON object of the following form.
 
   ```json
   {
@@ -29,10 +33,21 @@ In addition, HTTP GET requests to the `/status/` endpoint will return `{"ok": "t
 
 ### WebSocket
 
-When a client connects to the server through WebSocket, it will do so at the `/socket.io/<id>` endpoint. The ID route parameter is optional.
+As soon as a user downloads and opens the Vulcan client-side HTML + JS in their browser, the client will establish a WebSocket connection with the server. All communications go through the `/socket.io/<id>` endpoint, with an optional ID route parameter used to identify Layouts in the SQLite database. If an ID is provided, the server will look up the corresponding Layout and send it back to the client. If no ID is provided, the server will instead return a standard Layout object, based on a pre-parsed corpus containing sentences from the Wall Street Journal. 
 
-If no ID is provided, the server will return a standard Layout object, based on a pre-parsed corpus containing sentences from the Wall Street Journal. If an ID is provided, the server will look up the corresponding Layout object in the SQLite database and send it to the client.
+The server handles the following WebSocket events:
 
+- `connect`: tells the server to establish a connection. The server will return a stored Layout (if an ID is provided) or the standard Layout to the client, where it can be rendered on screen.
+- `disconnect`: tells the server to close the connection.
+- `instance_requested`: provides a page number, or index, to the server. The server will return a Layout object based on the sentence at that index in the pre-parsed corpus.
+- `perform_search`: provides search parameters. The server then uses these parameters to perform a search on the standard Layout. The resulting new Layout object is stored in the database alongside a unique identifier, which is sent back to the client. The client uses the identifier to construct a new URL where it can find the search result. This URL can be shared with other users, who will then see the same search result.
+- `clear_search`: retrieves the base Layout for the current Layout. This is used to clear the search results and return the standard Layout.
+
+## Layout cleanup
+
+Layouts that are stored in the database will be marked for cleanup if they have not been consulted for 90 days, as measured by the timestamp associated with the Layout in the database. Whenever Layout is requested, its timestamp is updated to the current time.
+
+It is recommended to periodically clean up the database by running `remove_old_layouts.py`. This script will remove all Layouts that have been marked for cleanup. It is recommended to run this script periodically. The file `Crontab` can be used to schedule this script to run automatically on Linux-based machines that host the ParsePort Docker network.
 
 ## Running a local development server
 

@@ -2,13 +2,15 @@ from flask_socketio import emit
 
 from vulcan.data_handling.data_corpus import CorpusSlice
 from vulcan.file_loader import BasicLayout
-from vulcan.search.search import create_list_of_possible_search_filters
-from server_methods import instance_requested
+from vulcan.search.search import create_list_of_possible_search_filters, SearchFilter
 
+from .server_methods import instance_requested
 from logger import log
 
 
-def send_layout_to_client(sid: str, layout: BasicLayout) -> None:
+def send_layout_to_client(
+    sid: str, layout: BasicLayout, active_search_filters: list[SearchFilter]
+) -> None:
     try:
         emit("set_layout", make_layout_sendable(layout), to=sid)
         emit("set_corpus_length", layout.corpus_size, to=sid)
@@ -19,6 +21,12 @@ def send_layout_to_client(sid: str, layout: BasicLayout) -> None:
             to=sid,
         )
         instance_requested(sid, layout, 0)
+
+        serialized_filters = [
+            filter.serialize() for filter in active_search_filters
+        ]
+
+        emit("activate_search_filters", serialized_filters, to=sid)
     except Exception as e:
         log.exception(e)
         emit("server_error", to=sid)

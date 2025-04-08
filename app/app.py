@@ -1,16 +1,21 @@
 import os
-from flask import Flask, request, session
+from flask import Flask, request
 from flask_socketio import SocketIO, emit
 
 from vulcan.file_loader import create_layout_from_filepath
-from vulcan.search.search import create_list_of_possible_search_filters
 
 from logger import log
-from server_methods import instance_requested
-from process_parse_data import process_parse_data
+from services.server_methods import instance_requested
+from services.process_parse_data import process_parse_data
 from db.models import db
-from get_user_layout import get_user_layout
-from send_layout_to_client import send_layout_to_client
+from services.get_user_layout import (
+    get_stored_layout,
+    get_and_unpack_layout,
+    unpack_layout,
+    unpack_search_filters,
+)
+from services.send_layout_to_client import send_layout_to_client
+from services.search import handle_search
 
 # TODO: Handle CORS properly.
 socketio = SocketIO(cors_allowed_origins="*")
@@ -19,6 +24,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 STANDARD_LAYOUT_INPUT_PATH = "./standard.pickle"
 # For dev purposes.
 # STANDARD_LAYOUT_INPUT_PATH = "./little_prince_simple.pickle"
+
 
 def create_app() -> Flask:
     log.info("Creating app...")
@@ -37,6 +43,7 @@ def create_app() -> Flask:
     app.config["SECRET_KEY"] = os.environ.get("VULCAN_SECRET_KEY")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 
+    # HTTP route handlers
     @app.route("/status/", methods=["GET"])
     def status():
         if standard_layout is not None:
@@ -45,13 +52,6 @@ def create_app() -> Flask:
 
     @app.route("/", methods=["POST"])
     def handle_parse_request():
-        """
-        Extract parse data from the request and proceeds to create a layout
-        from it.
-
-        After validating the input, the input is stored in a SQLite database
-        along with the UUID and a timestamp.
-        """
         log.debug("Handling parse request!")
         try:
             process_parse_data(request, db)
@@ -63,18 +63,26 @@ def create_app() -> Flask:
 
         return {"ok": True}, 200
 
+    # Websocket event handlers
     @socketio.on("connect")
     def handle_connect():
-        log.debug("Connected!")
+        log.debug("Client connected")
 
-        layout = get_user_layout(request, db)
-        if layout is None:
+        stored_layout = get_stored_layout(request, db)
+        if stored_layout:
+            layout = unpack_layout(stored_layout)
+            search_filters = (
+                unpack_search_filters(stored_layout.search_filters)
+                if stored_layout.search_filters
+                else []
+            )
+        else:
             log.info("No layout found for user. Using standard layout.")
             layout = standard_layout
+            search_filters = []
 
         sid = request.sid
-
-        send_layout_to_client(sid, layout)
+        send_layout_to_client(sid, layout, search_filters)
 
     @socketio.on("disconnect")
     def handle_disconnect():
@@ -82,7 +90,31 @@ def create_app() -> Flask:
 
     @socketio.on("instance_requested")
     def handle_instance_requested(index):
-        instance_requested(request.sid, standard_layout, index)
+        layout = get_and_unpack_layout(request, db)
+        if layout is None:
+            log.info(
+                f"No layout found for user on requesting instance. Using standard layout."
+            )
+            layout = standard_layout
+        instance_requested(request.sid, layout, index)
+
+    @socketio.on("perform_search")
+    def perform_search(data):
+        """
+        Perform a search on the current layout and reroute to it.
+        """
+        log.debug("Search requested")
+        result_identifier = handle_search(db, data, standard_layout)
+        log.debug("Search successful. Rerouting to result.")
+        emit("route_to_layout", result_identifier, to=request.sid)
+
+    @socketio.on("clear_search")
+    def clear_search():
+        """
+        Clear search: return to standard layout.
+        """
+        log.debug("Clearing search.")
+        emit("route_to_layout", "", to=request.sid)
 
     socketio.init_app(app)
     db.init_app(app)
