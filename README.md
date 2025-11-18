@@ -55,7 +55,9 @@ The server can be run in three different ways:
 
 1. Locally, using Flask's built-in development server.
 2. In a standalone Docker container.
-3. As part of the ParsePort container network, using Docker Compose.
+3. As part of the ParsePort container network, using Docker Compose. Refer to the [ParsePort documentation](https://github.com/CentreForDigitalHumanities/parseport) for more information.
+
+NB: if you run the server within the ParsePort network, the application files in `/vulcan/client` are not used. Instead, the ParsePort backend application serves its own version of these files.
 
 To run the server locally, you need to have Python 3.12 or higher installed (lower versions may work but have not been tested).
 
