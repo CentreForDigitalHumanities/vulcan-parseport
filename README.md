@@ -148,3 +148,17 @@ The server should now be running and reachable on `http://localhost:5000`.
 
 No `.env` file is needed in this case, as the ParsePort container network will provide the necessary environment variables. Please consult the [ParsePort documentation](https://github.com/CentreForDigitalHumanities/parseport) for more information.
 
+
+## Changes
+
+In addition to changes specified in individual files, the following changes have been made in this fork with regard to the original VULCAN repository:
+- Deleted `launch_vulcan.py`, `debugging_main.py`, `setup.py`, `visualize_amr_corpus.py`
+- Moved files in `vulcan/` to `app/vulcan/`.
+- Added the following files (in addition to generic housekeeping files such as `.gitignore` and `README.md`):
+  - `Dockerfile`
+  - `app/services/`
+  - `db/models.py`
+  - `Crontab`
+  - `remove_old_layouts.py`
+  - `logger.py`
+  - `app.py`

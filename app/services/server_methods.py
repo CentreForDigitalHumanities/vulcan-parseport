@@ -1,3 +1,22 @@
+# Copyright 2022 Jonas Groschwitz
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Portions of this file are derived from vulcan.server.server
+# Original source: https://github.com/jgroschwitz/vulcan
+
+# We cannot import from vulcan.server.server directly, since it crashes the app.
+
+
 from typing import Any
 
 from flask_socketio import emit
@@ -7,9 +26,6 @@ from logger import log
 from vulcan.data_handling.visualization_type import VisualizationType
 from vulcan.server.basic_layout import BasicLayout
 from vulcan.search.search import SearchFilter
-
-# These methods are copied from vulcan.server.server.
-# We cannot import that file directly, since it crashes the app.
 
 
 def cell_coordinates_to_cell_name(row: int, column: int) -> str:
