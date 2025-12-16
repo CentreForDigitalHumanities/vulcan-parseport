@@ -1,0 +1,42 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: VULCAN-ParsePort
+message: >-
+  Fork of VULCAN (Visualizations for Understanding Language
+  Corpora and model predictioNs) for use in the ParsePort
+  project.
+type: software
+authors:
+  - given-names: Alexander Johannes Jacobus
+    family-names: Vertegaal
+    email: a.j.j.vertegaal@uu.nl
+    affiliation: Utrecht University Centre for Digital Humanities
+    orcid: 'https://orcid.org/0000-0002-5182-6801'
+  - given-names: Mees
+    name-particle: van
+    family-names: Stiphout
+    email: mees.vanstiphout@uu.nl
+    affiliation: Utrecht University Centre for Digital Humanities
+  - given-names: Jonas
+    family-names: Groschwitz
+    email: jonas.groschwitz@gmail.com
+repository-code: >-
+  https://github.com/CentreForDigitalHumanities/vulcan-parseport
+abstract: >-
+  VULCAN-ParsePort is a fork of VULCAN (Visualizations for
+  Understanding Language Corpora and model predictioNs) for
+  use in the ParsePort project.
+keywords:
+  - visualisation
+  - linguistics
+  - syntax
+  - nlp
+  - parser
+  - websocket
+  - flask
+license: Apache-2.0
+commit: 949255035bb8df8f6e29c1b3677ab2e63cb20e04
+version: 0.1.0
+date-released: '2025-05-01'
