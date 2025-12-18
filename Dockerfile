@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.10-bullseye
+FROM python:3.14-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -22,10 +22,10 @@ WORKDIR /app
 ENV FLASK_APP=app.py
 ENV FLASK_DEBUG=0
 ENV VULCAN_PORT=32771
-ENV VULCAN_SECRET_KEY="insecure-key"
 
 # Expose the port
 EXPOSE $VULCAN_PORT
 
 # Start the application.
+# Shell form (instead of recommended JSON form) to allow variable expansion.
 CMD flask run --host=0.0.0.0 --port=${VULCAN_PORT}
