@@ -38,5 +38,5 @@ keywords:
   - flask
 license: Apache-2.0
 commit: 949255035bb8df8f6e29c1b3677ab2e63cb20e04
-version: 0.1.0
-date-released: '2025-05-01'
+version: 1.0.0
+date-released: '2025-12-18'
