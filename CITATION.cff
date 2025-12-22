@@ -22,6 +22,9 @@ authors:
   - given-names: Jonas
     family-names: Groschwitz
     email: jonas.groschwitz@gmail.com
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.17974274
 repository-code: >-
   https://github.com/CentreForDigitalHumanities/vulcan-parseport
 abstract: >-

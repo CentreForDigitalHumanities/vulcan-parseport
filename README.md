@@ -1,6 +1,6 @@
 # VULCAN -- ParsePort
 
-[![DOI](https://zenodo.org/badge/881050880.svg)](https://doi.org/10.5281/zenodo.17974273)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17974273.svg)](https://doi.org/10.5281/zenodo.17974273)
 
 This is a fork of the original repository of VULCAN (Visualizations for Understanding Language Corpora and model predictioNs), developed and maintained by [dr. Jonas Groschwitz (jgroschwitz)](https://github.com/jgroschwitz). Please refer to the [original repo](https://github.com/jgroschwitz/vulcan) for the original documentation, including setup and usage instructions. More information about VULCAN can be found in the original paper: [Introducing VULCAN: A Visualization Tool for Understanding Our Models and Data by Example (Groschwitz, BlackboxNLP 2023)](https://aclanthology.org/2023.blackboxnlp-1.15/).
 
